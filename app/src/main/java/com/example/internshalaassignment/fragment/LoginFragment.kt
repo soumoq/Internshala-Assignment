@@ -1,5 +1,6 @@
 package com.example.internshalaassignment.fragment
 
+import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
@@ -10,12 +11,12 @@ import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
 import com.example.internshalaassignment.R
 import com.example.internshalaassignment.Util.toast
+import com.example.internshalaassignment.activity.MainActivity
+import com.example.internshalaassignment.dialog.ProgressDialog
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
-import com.google.android.gms.tasks.OnCompleteListener
-import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import kotlinx.android.synthetic.main.fragment_login.view.*
@@ -26,6 +27,7 @@ class LoginFragment : Fragment() {
     private var mGoogleSignInClient: GoogleSignInClient? = null
     private val RC_SIGN_IN = 1
     private lateinit var auth: FirebaseAuth
+    private var progressDialog: ProgressDialog? = null
 
     @RequiresApi(Build.VERSION_CODES.N)
     override fun onCreateView(
@@ -34,9 +36,11 @@ class LoginFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_login, container, false)
+        //progress dialog
+        progressDialog = ProgressDialog(view.context);
+        progressDialog!!.setCancelable(false);
 
         auth = FirebaseAuth.getInstance()
-
         // Configure Google Sign In
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
             .requestIdToken(getString(R.string.default_web_client_id))
@@ -65,12 +69,14 @@ class LoginFragment : Fragment() {
         if (requestCode == RC_SIGN_IN) {
             val task = GoogleSignIn.getSignedInAccountFromIntent(data)
             try {
+                progressDialog?.show()
                 // Google Sign In was successful, authenticate with Firebase
                 val account = task.getResult(ApiException::class.java)
                 account!!.idToken?.let { firebaseAuthWithGoogle(it) }
             } catch (e: ApiException) {
+                progressDialog?.dismiss()
                 // Google Sign In failed, update UI appropriately
-                // ...
+                context?.toast(e.message.toString())
             }
         }
     }
@@ -78,11 +84,14 @@ class LoginFragment : Fragment() {
     private fun firebaseAuthWithGoogle(idToken: String) {
         val credential = GoogleAuthProvider.getCredential(idToken, null)
         auth.signInWithCredential(credential).addOnCompleteListener {
+            progressDialog?.dismiss()
             if (it.isSuccessful) {
-                context?.toast("success")
+                (activity as MainActivity?)?.gotoNotes()
             } else {
-                context?.toast("Fail")
+                context?.toast("Google signing in failed")
             }
         }
     }
+
+
 }
