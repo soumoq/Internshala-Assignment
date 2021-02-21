@@ -34,4 +34,9 @@ class DBHelper : SQLiteOpenHelper {
         return db.rawQuery("select * from userNotes", null)
     }
 
+    fun deleteNote(id: Int): Boolean {
+        val db: SQLiteDatabase = this.writableDatabase
+        return db.delete("userNotes", "noteId=$id", null) > 0
+    }
+
 }

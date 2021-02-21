@@ -22,6 +22,10 @@ import kotlinx.android.synthetic.main.fragment_note.view.*
 
 class NotesFragment : Fragment() {
 
+    var dbHelper: DBHelper? = null
+    var noteViewModel: NoteViewModel? = null
+    var notesAdapter = NotesAdapter(this)
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -32,16 +36,15 @@ class NotesFragment : Fragment() {
         val auth = FirebaseAuth.getInstance()
         val user = auth.currentUser
 
-        val notesAdapter = NotesAdapter(this)
         view.fragment_note_list.adapter = notesAdapter
-        val dbHelper = DBHelper(context)
-        val noteViewModel = ViewModelProvider(this).get(NoteViewModel::class.java)
-        noteViewModel.noteList.observe(viewLifecycleOwner, Observer {
+        dbHelper = DBHelper(context)
+        noteViewModel = ViewModelProvider(this).get(NoteViewModel::class.java)
+        noteViewModel!!.noteList.observe(viewLifecycleOwner, Observer {
             if (it.isNotEmpty()) {
                 notesAdapter.updateData(it)
             }
         })
-        noteViewModel.getNotes(dbHelper)
+        noteViewModel!!.getNotes(dbHelper!!)
 
         view.fragment_note_add.setOnClickListener {
             val layout = LinearLayout(context)
@@ -61,10 +64,14 @@ class NotesFragment : Fragment() {
             alert?.setView(layout)
             alert?.setPositiveButton("add", DialogInterface.OnClickListener { dialog, which ->
                 val status =
-                    noteViewModel.insertNote(dbHelper, name.text.toString(), note.text.toString())
+                    noteViewModel!!.insertNote(
+                        dbHelper!!,
+                        name.text.toString(),
+                        note.text.toString()
+                    )
                 if (status) {
                     context?.toast("Note added")
-                    noteViewModel.getNotes(dbHelper)
+                    noteViewModel!!.getNotes(dbHelper!!)
                     notesAdapter.notifyDataSetChanged()
                 } else {
                     context?.toast("Something went wrong")
@@ -88,8 +95,12 @@ class NotesFragment : Fragment() {
         val alert = context?.let { it1 -> AlertDialog.Builder(it1) }
         alert?.setTitle("Are you sure you want to delete the note")
         alert?.setPositiveButton("Ok", DialogInterface.OnClickListener { dialog, which ->
-
-            context?.toast("Deleted")
+            val status = noteViewModel?.deleteNote(dbHelper!!, noteId)
+            if (status == true) {
+                noteViewModel!!.getNotes(dbHelper!!)
+                notesAdapter.notifyDataSetChanged()
+                context?.toast("Deleted")
+            }
         })
         alert?.setNegativeButton("cancel", DialogInterface.OnClickListener { dialog, which ->
         })
