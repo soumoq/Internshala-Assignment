@@ -51,13 +51,18 @@ class NotesAdapter(private val notesFragment: NotesFragment) :
             name.text = notes.name
             note.text = notes.note
 
+            view.layout_note_index.text = (adapterPosition + 1).toString()
             view.layout_notes_more.setOnClickListener {
                 val popupMenu = PopupMenu(it.context, it)
                 popupMenu.inflate(R.menu.menu)
                 popupMenu.setOnMenuItemClickListener {
                     when (it.itemId) {
                         R.id.update ->
-                            notesFragment.updateNote(notes.noteId)
+                            notesFragment.updateNote(
+                                notes.noteId,
+                                notes.name.toString(),
+                                notes.note.toString()
+                            )
                         R.id.delete ->
                             notesFragment.deleteNote(notes.noteId)
                     }
