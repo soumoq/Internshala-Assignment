@@ -32,7 +32,7 @@ class NotesFragment : Fragment() {
         val auth = FirebaseAuth.getInstance()
         val user = auth.currentUser
 
-        val notesAdapter = NotesAdapter()
+        val notesAdapter = NotesAdapter(this)
         view.fragment_note_list.adapter = notesAdapter
         val dbHelper = DBHelper(context)
         val noteViewModel = ViewModelProvider(this).get(NoteViewModel::class.java)
@@ -60,7 +60,8 @@ class NotesFragment : Fragment() {
 
             alert?.setView(layout)
             alert?.setPositiveButton("add", DialogInterface.OnClickListener { dialog, which ->
-                val status = noteViewModel.insertNote(dbHelper, name.text.toString(), note.text.toString())
+                val status =
+                    noteViewModel.insertNote(dbHelper, name.text.toString(), note.text.toString())
                 if (status) {
                     context?.toast("Note added")
                     noteViewModel.getNotes(dbHelper)
@@ -71,7 +72,6 @@ class NotesFragment : Fragment() {
             })
 
             alert?.setNegativeButton("cancel", DialogInterface.OnClickListener { dialog, which ->
-
             })
 
             alert?.show()
@@ -79,4 +79,21 @@ class NotesFragment : Fragment() {
 
         return view
     }
+
+    fun updateNote(noteId: Int) {
+        context?.toast("update $noteId")
+    }
+
+    fun deleteNote(noteId: Int) {
+        val alert = context?.let { it1 -> AlertDialog.Builder(it1) }
+        alert?.setTitle("Are you sure you want to delete the note")
+        alert?.setPositiveButton("Ok", DialogInterface.OnClickListener { dialog, which ->
+            
+            context?.toast("Deleted")
+        })
+        alert?.setNegativeButton("cancel", DialogInterface.OnClickListener { dialog, which ->
+        })
+        alert?.show()
+    }
+
 }
