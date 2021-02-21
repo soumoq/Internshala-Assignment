@@ -88,7 +88,7 @@ class NotesFragment : Fragment() {
         val alert = context?.let { it1 -> AlertDialog.Builder(it1) }
         alert?.setTitle("Are you sure you want to delete the note")
         alert?.setPositiveButton("Ok", DialogInterface.OnClickListener { dialog, which ->
-            
+
             context?.toast("Deleted")
         })
         alert?.setNegativeButton("cancel", DialogInterface.OnClickListener { dialog, which ->
