@@ -24,4 +24,8 @@ class NoteViewModel : ViewModel() {
     fun deleteNote(dbHelper: DBHelper, id: Int): Boolean {
         return dbHelper?.deleteNote(id)
     }
+
+    fun updateNote(dbHelper: DBHelper, id: Int, name: String, note: String): Boolean {
+        return dbHelper?.updateNote(id, name, note)
+    }
 }

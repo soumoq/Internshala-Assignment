@@ -39,4 +39,12 @@ class DBHelper : SQLiteOpenHelper {
         return db.delete("userNotes", "noteId=$id", null) > 0
     }
 
+    fun updateNote(id: Int, name: String, note: String): Boolean {
+        val db: SQLiteDatabase = this.writableDatabase
+        val contentValue = ContentValues()
+        contentValue.put("name", name)
+        contentValue.put("note", note)
+        return db.update("userNotes", contentValue, "noteId=$id", null) > 0
+    }
+
 }

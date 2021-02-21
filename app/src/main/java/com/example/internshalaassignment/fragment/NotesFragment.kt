@@ -47,48 +47,14 @@ class NotesFragment : Fragment() {
         noteViewModel!!.getNotes(dbHelper!!)
 
         view.fragment_note_add.setOnClickListener {
-            val layout = LinearLayout(context)
-            layout.orientation = LinearLayout.VERTICAL
-
-            val alert = context?.let { it1 -> AlertDialog.Builder(it1) }
-            alert?.setTitle("Add note")
-
-            val name = EditText(context)
-            name.setHint("Title")
-            layout.addView(name)
-
-            val note = EditText(context)
-            note.setHint("Note")
-            layout.addView(note)
-
-            alert?.setView(layout)
-            alert?.setPositiveButton("add", DialogInterface.OnClickListener { dialog, which ->
-                val status =
-                    noteViewModel!!.insertNote(
-                        dbHelper!!,
-                        name.text.toString(),
-                        note.text.toString()
-                    )
-                if (status) {
-                    context?.toast("Note added")
-                    noteViewModel!!.getNotes(dbHelper!!)
-                    notesAdapter.notifyDataSetChanged()
-                } else {
-                    context?.toast("Something went wrong")
-                }
-            })
-
-            alert?.setNegativeButton("cancel", DialogInterface.OnClickListener { dialog, which ->
-            })
-
-            alert?.show()
+            showDialog("Add note")
         }
 
         return view
     }
 
     fun updateNote(noteId: Int) {
-        context?.toast("update $noteId")
+        showDialog("Update note", noteId)
     }
 
     fun deleteNote(noteId: Int) {
@@ -104,6 +70,57 @@ class NotesFragment : Fragment() {
         })
         alert?.setNegativeButton("cancel", DialogInterface.OnClickListener { dialog, which ->
         })
+        alert?.show()
+    }
+
+
+    private fun showDialog(title: String, id: Int = 0) {
+        val layout = LinearLayout(context)
+        layout.orientation = LinearLayout.VERTICAL
+
+        val alert = context?.let { it1 -> AlertDialog.Builder(it1) }
+        alert?.setTitle(title)
+
+        val name = EditText(context)
+        name.setHint("Title")
+        layout.addView(name)
+
+        val note = EditText(context)
+        note.setHint("Note")
+        layout.addView(note)
+
+        alert?.setView(layout)
+        alert?.setPositiveButton("add", DialogInterface.OnClickListener { dialog, which ->
+            if (title.equals("Add note")) {
+                val status = noteViewModel!!.insertNote(
+                    dbHelper!!,
+                    name.text.toString(),
+                    note.text.toString()
+                )
+                if (status) {
+                    context?.toast("Note added")
+                    noteViewModel!!.getNotes(dbHelper!!)
+                    notesAdapter.notifyDataSetChanged()
+                } else {
+                    context?.toast("Something went wrong")
+                }
+            } else {
+
+                val status = noteViewModel!!.updateNote(
+                    dbHelper!!,
+                    id,
+                    name.text.toString(),
+                    note.text.toString()
+                )
+                if (status) {
+                    context?.toast("Updated")
+                }
+            }
+        })
+
+        alert?.setNegativeButton("cancel", DialogInterface.OnClickListener { dialog, which ->
+        })
+
         alert?.show()
     }
 
