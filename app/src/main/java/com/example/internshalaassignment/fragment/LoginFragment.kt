@@ -53,7 +53,6 @@ class LoginFragment : Fragment() {
             signIn()
         }
 
-
         return view
     }
 

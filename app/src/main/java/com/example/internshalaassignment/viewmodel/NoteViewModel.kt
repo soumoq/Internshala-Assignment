@@ -8,12 +8,17 @@ import com.example.internshalaassignment.model.NoteModel
 class NoteViewModel : ViewModel() {
     var noteList = MutableLiveData<List<NoteModel>>()
 
-    fun getNotes(dbHelper: DBHelper) {
+    fun getNotes(dbHelper: DBHelper): Boolean {
         val cursor = dbHelper.getData()
         var list = ArrayList<NoteModel>()
-        while (cursor.moveToNext()) {
-            list.add(NoteModel(cursor.getInt(0), cursor.getString(1), cursor.getString(2)))
-            noteList.value = list
+        return if (cursor.count <= 0) {
+            false
+        } else {
+            while (cursor.moveToNext()) {
+                list.add(NoteModel(cursor.getInt(0), cursor.getString(1), cursor.getString(2)))
+                noteList.value = list
+            }
+            true
         }
     }
 

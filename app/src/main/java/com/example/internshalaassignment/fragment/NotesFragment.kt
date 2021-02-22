@@ -20,6 +20,7 @@ import com.example.internshalaassignment.adapter.NotesAdapter
 import com.example.internshalaassignment.database.DBHelper
 import com.example.internshalaassignment.viewmodel.NoteViewModel
 import com.google.firebase.auth.FirebaseAuth
+import kotlinx.android.synthetic.main.fragment_note.*
 import kotlinx.android.synthetic.main.fragment_note.view.*
 
 
@@ -44,10 +45,11 @@ class NotesFragment : Fragment() {
         noteViewModel = ViewModelProvider(this).get(NoteViewModel::class.java)
         noteViewModel!!.noteList.observe(viewLifecycleOwner, Observer {
             if (it.isNotEmpty()) {
+                fragment_note_list.visibility = View.VISIBLE
                 notesAdapter.updateData(it)
             }
         })
-        noteViewModel!!.getNotes(dbHelper!!)
+        noteViewModel!!.getNotes(dbHelper!!).toString()
 
         view.fragment_note_add.setOnClickListener {
             showDialog("Add note")
@@ -56,14 +58,7 @@ class NotesFragment : Fragment() {
         view.fragment_note_account.setOnClickListener {
             val alert = context?.let { it1 -> AlertDialog.Builder(it1) }
             alert?.setTitle(user?.displayName.toString())
-
-            val layout = LinearLayout(context)
-            layout.orientation = LinearLayout.VERTICAL
-
-            val name = TextView(context)
-            name.setText("Email: ${user?.email.toString()}")
-            alert?.setView(layout)
-            layout.addView(name)
+            alert?.setMessage("Email: ${user?.email.toString()}")
             alert?.setPositiveButton("Logout", DialogInterface.OnClickListener { dialog, which ->
                 auth.signOut()
                 val intent = Intent(context, MainActivity::class.java)
@@ -88,9 +83,13 @@ class NotesFragment : Fragment() {
         alert?.setPositiveButton("Ok", DialogInterface.OnClickListener { dialog, which ->
             val status = noteViewModel?.deleteNote(dbHelper!!, noteId)
             if (status == true) {
-                noteViewModel!!.getNotes(dbHelper!!)
-                notesAdapter.notifyDataSetChanged()
-                context?.toast("Deleted")
+                val status = noteViewModel!!.getNotes(dbHelper!!)
+                if (status) {
+                    notesAdapter.notifyDataSetChanged()
+                    context?.toast("Deleted")
+                } else {
+                    fragment_note_list.visibility = View.GONE
+                }
             }
         })
         alert?.setNegativeButton("cancel", DialogInterface.OnClickListener { dialog, which ->
