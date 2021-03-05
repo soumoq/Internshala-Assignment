@@ -19,6 +19,9 @@ import com.example.internshalaassignment.activity.MainActivity
 import com.example.internshalaassignment.adapter.NotesAdapter
 import com.example.internshalaassignment.database.DBHelper
 import com.example.internshalaassignment.viewmodel.NoteViewModel
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInClient
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.android.synthetic.main.fragment_note.*
 import kotlinx.android.synthetic.main.fragment_note.view.*
@@ -29,6 +32,8 @@ class NotesFragment : Fragment() {
     var dbHelper: DBHelper? = null
     var noteViewModel: NoteViewModel? = null
     var notesAdapter = NotesAdapter(this)
+    var mGoogleSignInClient: GoogleSignInClient? = null
+
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -39,6 +44,13 @@ class NotesFragment : Fragment() {
 
         val auth = FirebaseAuth.getInstance()
         val user = auth.currentUser
+
+        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestIdToken(getString(R.string.default_web_client_id))
+            .requestEmail()
+            .build()
+
+        mGoogleSignInClient = activity?.let { GoogleSignIn.getClient(it, gso) };
 
         view.fragment_note_list.adapter = notesAdapter
         dbHelper = DBHelper(context)
@@ -61,9 +73,14 @@ class NotesFragment : Fragment() {
             alert?.setMessage("Email: ${user?.email.toString()}")
             alert?.setPositiveButton("Logout", DialogInterface.OnClickListener { dialog, which ->
                 auth.signOut()
-                val intent = Intent(context, MainActivity::class.java)
-                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                startActivity(intent)
+                mGoogleSignInClient?.signOut()?.addOnCompleteListener {
+                    val intent = Intent(context, MainActivity::class.java)
+                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                    startActivity(intent)
+                }?.addOnFailureListener {
+                    context?.toast(it.message.toString())
+                }
+
             })
             alert?.setNegativeButton("cancel", DialogInterface.OnClickListener { dialog, which ->
             })

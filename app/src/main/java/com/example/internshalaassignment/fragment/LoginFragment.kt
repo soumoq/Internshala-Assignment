@@ -75,7 +75,7 @@ class LoginFragment : Fragment() {
             } catch (e: ApiException) {
                 progressDialog?.dismiss()
                 // Google Sign In failed, update UI appropriately
-                context?.toast(e.message.toString())
+                //context?.toast(e.message.toString())
             }
         }
     }
